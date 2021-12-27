@@ -4,10 +4,11 @@ import "fmt"
 
 type QuickUnionUF struct {
 	id []int
+	sz []int // count number of objects in the tree rooted at i.
 }
 
 func main() {
-	p := QuickUnionUF{id: []int{}}
+	p := QuickUnionUF{id: []int{}, sz: []int{}}
 	p.initialize(10)
 	fmt.Println(p.connected(1, 2))
 	p.union(1, 2)
@@ -19,6 +20,7 @@ func main() {
 func (q *QuickUnionUF) initialize(N int) {
 	for i := 0; i < N; i++ {
 		(*q).id = append((*q).id, i)
+		(*q).sz = append((*q).sz, 1)
 	}
 }
 
@@ -37,7 +39,21 @@ func (q *QuickUnionUF) connected(x, y int) bool {
 }
 
 // union change root of p to point to root of q.
+// modified to link root of smaller tree to root of larger tree.
+// update the sz[] array.
 func (q *QuickUnionUF) union(x, y int) {
-	tmp := (*q).id
-	tmp[q.root(x)] = q.root(y)
+	tmpArr := (*q).id
+	tmpSize := (*q).sz
+	i := q.root(x)
+	j := q.root(y)
+	if i == j {
+		return
+	}
+	if tmpSize[x] < tmpSize[y] {
+		tmpArr[i] = j
+		tmpSize[j] += tmpSize[i]
+	} else {
+		tmpArr[j] = i
+		tmpSize[i] += tmpSize[j]
+	}
 }
